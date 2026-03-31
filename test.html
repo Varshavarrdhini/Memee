@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meme to Knowledge Converter</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: linear-gradient(160deg,#eaf2ff,#f4f4f4); padding: 30px; color: #202124; margin: 0; }
+    h1 { margin-bottom: 0.3rem; color: #1f3a93; }
+    h2, h3 { color: #2e3a59; }
+    input, select { padding: 12px; margin: 10px; font-size: 16px; width: 60%; border: 1px solid #cdd6e1; border-radius: 8px; }
+    button { padding: 10px 20px; font-size: 16px; background: #2463eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: transform .2s ease, background-color .2s ease; }
+    button:hover { transform: translateY(-2px); background: #1a51c8; }
+    #stars span { font-size: 26px; cursor: pointer; transition: transform .2s ease; }
+    #stars span:hover { transform: scale(1.2); }
+    .meme { border: 1px solid #ccc; margin: 10px; padding: 10px; display: inline-block; width: 300px; background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,.08); }
+    .robot-area { margin: 25px auto; padding: 20px; width: min(620px, 100%); background: #fff; border: 1px solid #d0d9ed; border-radius: 10px; box-shadow: 0 6px 16px rgba(33, 87, 181, .15); }
+    .robot-track { position: relative; height: 120px; overflow: hidden; border: 1px dashed #a7b5d9; border-radius: 10px; background: linear-gradient(90deg, #f4f7fd 0%, #eff5ff 100%); }
+    .robot { position: absolute; top: 50%; left: 10%; width: 100px; height: 100px; transform: translateY(-50%); cursor: pointer; transition: box-shadow .2s ease; }
+    .robot img { width: 100%; height: 100%; object-fit: contain; }
+    .robot:hover { box-shadow: 0 0 18px rgba(36, 99, 235, .45); }
+    .robot-caption { margin-top: 10px; font-size: 16px; color: #1a1f35; }
+    @keyframes walkSideToSide { 0% { left: 5%; } 25% { left: 55%; } 50% { left: 60%; } 75% { left: 15%; } 100% { left: 5%; } }
+    .robot { animation: walkSideToSide 8s linear infinite alternate; }
+  </style>
+</head>
+<body>
+
+<h1>🎭 Meme to Knowledge Converter</h1>
+<div class="robot-area">
+  <div class="robot-track" aria-label="Robot animation track">
+    <div class="robot" onclick="goToOutputPage()" role="button" aria-label="Go to output page">
+      <img src="https://i.imgur.com/BR2c7Mf.png" alt="AI robot" />
+    </div>
+  </div>
+  <p class="robot-caption">🤖 Entering the Meme World... click the robot to proceed</p>
+</div>
+
+<input type="text" id="inputText" placeholder="Enter text..." />
+<br>
+<select id="mode">
+  <option value="funny">😂 Funny</option>
+  <option value="motivational">💪 Motivational</option>
+  <option value="savage">🔥 Savage</option>
+</select>
+<br>
+<button onclick="generateMeme()">Generate Meme 🚀</button>
+
+<h2>All Memes (Including Scheduled Reminders)</h2>
+<div id="meme-list"></div>
+
+<h3>Rate this meme ⭐</h3>
+<div id="stars">
+  <span onclick="rate(1)">⭐</span>
+  <span onclick="rate(2)">⭐</span>
+  <span onclick="rate(3)">⭐</span>
+  <span onclick="rate(4)">⭐</span>
+  <span onclick="rate(5)">⭐</span>
+</div>
+<p id="rating-result"></p>
+
+<script>
+let currentMemeId = null;
+
+// 🔹 Generate Meme (existing functionality)
+function generateMeme() {
+  const text = document.getElementById("inputText").value;
+  const mode = document.getElementById("mode").value;
+
+  fetch('http://localhost:5000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `
+        mutation {
+          generateMeme(input: {
+            text: "${text}",
+            subject: "${mode}",
+            examDate: ""
+          }) { id caption imageUrl }
+        }
+      `
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const meme = data.data.generateMeme;
+    currentMemeId = meme.id;
+    // Append new meme to list
+    appendMemeToList(meme);
+  });
+}
+
+// 🔹 Submit Rating (existing functionality)
+function rate(value) {
+  if (!currentMemeId) { alert("Generate meme first!"); return; }
+
+  fetch('http://localhost:5000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `
+        mutation {
+          submitFeedback(
+            memeId: "${currentMemeId}",
+            rating: ${value},
+            comment: "User rated ${value} stars"
+          ) { rating }
+        }
+      `
+    })
+  })
+  .then(() => {
+    document.getElementById("rating-result").innerText = "You rated " + value + " ⭐";
+  });
+}
+
+// 🔹 Fetch all memes including reminder memes
+async function fetchAllMemes() {
+  const res = await fetch('http://localhost:5000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `query { getAllMemes { id caption imageUrl subject examDate } }`
+    })
+  });
+  const data = await res.json();
+  const memes = data.data.getAllMemes;
+  displayMemes(memes);
+}
+
+// 🔹 Display memes in the frontend
+function displayMemes(memes) {
+  const container = document.getElementById("meme-list");
+  container.innerHTML = ""; // clear old memes
+  memes.forEach(m => appendMemeToList(m));
+}
+
+function appendMemeToList(meme) {
+  const container = document.getElementById("meme-list");
+  const div = document.createElement("div");
+  div.className = "meme";
+  div.innerHTML = `
+    <h4>${meme.caption}</h4>
+    <img src="${meme.imageUrl}" width="280"/>
+    <small>${meme.subject} | ${meme.examDate || "No Date"}</small>
+  `;
+  container.prepend(div); // show newest first
+}
+
+function goToOutputPage() {
+  window.location.href = 'output.html';
+}
+
+// 🔹 Auto-refresh every 30 seconds to get new scheduled memes
+setInterval(fetchAllMemes, 30000);
+
+// 🔹 Initial load
+fetchAllMemes();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Meme Knowledge Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: linear-gradient(120deg, #f5f7fa 0%, #e8edf4 40%, #dce4ef 100%);
+            --bg-dark: linear-gradient(120deg, #0e1724 0%, #111827 40%, #0b1222 100%);
+            --text-light: #1f2937;
+            --text-dark: #f8fafc;
+            --card-light: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            --card-dark: linear-gradient(135deg, #1e293b 0%, #111827 100%);
+            --accent-light: #dc2626;
+            --accent-dark: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+            transition: background 0.6s ease, color 0.6s ease;
+        }
+
+        body.dark-mode {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .landing-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(120deg, #f0f4ff 0%, #dbe8ff 40%, #c7d9ff 100%);
+        }
+
+        .robot-card {
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 20px 45px rgba(20, 75, 145, 0.2);
+            padding: 30px;
+            max-width: 420px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .robot-card {
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 20px 45px rgba(20, 75, 145, 0.2);
+            padding: 30px;
+            max-width: 420px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            animation: robotWalk 6s ease-in-out infinite alternate;
+        }
+
+        .robot-body {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            position: relative;
+            background: #1e3a8a;
+            border-radius: 22px;
+            overflow: hidden;
+        }
+
+        .robot-head {
+            width: 80px;
+            height: 50px;
+            background: #60a5fa;
+            border-radius: 10px;
+            position: absolute;
+            left: 50%;
+            top: 22px;
+            transform: translateX(-50%);
+            animation: robotShake 1.8s ease-in-out infinite;
+        }
+
+        .robot-eyes {
+            position: absolute;
+            left: 50%;
+            top: 16px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
+        }
+
+        .robot-eyes::before,
+        .robot-eyes::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+        }
+
+        .robot-mouth {
+            width: 30px;
+            height: 8px;
+            border-radius: 0 0 8px 8px;
+            background: #f8fafc;
+            position: absolute;
+            left: 50%;
+            top: 38px;
+            transform: translateX(-50%);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+            animation: mouthPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes mouthPulse {
+            0%, 100% { width: 28px; }
+            50% { width: 34px; }
+        }
+
+        @keyframes robotWalk {
+            0% { transform: translateX(-40px); }
+            50% { transform: translateX(40px); }
+            100% { transform: translateX(-40px); }
+        }
+
+        .robot-antenna {
+            position: absolute;
+            width: 8px;
+            height: 20px;
+            background: #0ea5e9;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 4px 4px;
+        }
+
+        .robot-text {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1f2937;
+            letter-spacing: 0.4px;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(59, 130, 246, 0.4);
+        }
+
+        @keyframes robotShake {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-3px); }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .theme-btn {
+            background: rgba(30, 64, 175, 0.95);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 700;
+            transition: transform 0.25s ease, background 0.25s ease;
+            box-shadow: 0 6px 20px rgba(8, 145, 255, 0.35);
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(59, 130, 246, 1);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .header h1 {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 18px rgba(33, 150, 243, 0.6),
+                        0 0 30px rgba(56, 189, 248, 0.4);
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #0ea5e9, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: bounceTitle 1s ease-in-out;
+        }
+
+        @keyframes bounceTitle {
+            0% { transform: translateY(-6px); opacity: 0.7; }
+            50% { transform: translateY(0px); opacity: 1; }
+            100%{ transform: translateY(-2px); opacity: 0.95; }
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            text-shadow: 0 2px 10px rgba(255, 153, 0, 0.6),
+                        0 0 15px rgba(255, 200, 0, 0.4);
+            font-weight: 500;
+            margin-top: 10px;
+            color: #e0e0e0;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: flex-start;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        .input-section {
+            flex: 1 1 360px;
+            max-width: 500px;
+            min-width: 320px;
+        }
+
+        .display-section {
+            flex: 1 1 520px;
+            border: none;
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Input Section */
+        .input-section {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 26px;
+            border-radius: 14px;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: popIn 0.8s ease-out;
+        }
+
+        .input-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.2);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body.dark-mode .input-section {
+            background: var(--card-dark);
+            border: 2px solid rgba(148, 163, 184, 0.45);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35),
+                       0 0 40px rgba(30, 58, 138, 0.25);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .input-section:hover {
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25), 
+                       0 0 50px rgba(255, 153, 0, 0.3),
+                       inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transform: translateY(-5px);
+        }
+
+        .input-section h2 {
+            color: #d97706;
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+            font-weight: 700;
+            transition: none;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #92400e;
+            font-weight: 700;
+            font-size: 1.05em;
+            text-shadow: none;
+            transition: none;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #fed7aa;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fffbf0;
+            color: #92400e;
+            font-weight: 500;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .form-group input::placeholder {
+            color: #a16207;
+            transition: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ea580c;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1),
+                       0 0 15px rgba(234, 88, 12, 0.3);
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .form-group label {
+            color: #93c5fd;
+        }
+
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-color: #334155;
+        }
+
+        body.dark-mode .form-group input::placeholder {
+            color: #94a3b8;
+        }
+
+        body.dark-mode .suggestions {
+            background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+            border: 1px solid #334155;
+        }
+
+        .suggestions {
+            background: linear-gradient(135deg, #fef3e2 0%, #fde8d4 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #fed7aa;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .suggestions label {
+            display: block;
+            margin-bottom: 15px;
+            color: #92400e;
+            font-weight: 700;
+            font-size: 1.05em;
+            text-shadow: none;
+            transition: none;
+        }
+
+        .suggestion-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggestion-btn {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            border: 2px solid #3b82f6;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+            white-space: nowrap;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .suggestion-btn:hover {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4),
+                       0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .suggestion-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px 30px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            font-size: 1.25em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.3),
+                       0 0 20px rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.5s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(220, 38, 38, 0.4),
+                       0 0 30px rgba(220, 38, 38, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Display Section */
+        .display-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            animation: slideInRight 0.7s ease-out;
+            padding: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            width: 100%;
+            max-width: 760px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .meme-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25),
+                       0 0 30px rgba(255, 153, 0, 0.15);
+            border: 2px solid rgba(255, 153, 0, 0.2);
+            animation: zoomIn 0.6s ease-out;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .meme-container:hover {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3),
+                       0 0 40px rgba(255, 153, 0, 0.2);
+            transform: scale(1.02);
+        }
+
+        .meme-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .meme-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+            color: #ffffff;
+            padding: 40px 20px 20px;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 800;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8),
+                        0 0 20px rgba(255, 153, 0, 0.3),
+                        2px 2px 4px rgba(0, 0, 0, 0.5);
+            min-height: 100px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            letter-spacing: 1px;
+            animation: slideUp 0.6s ease-out 0.2s both;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: #ffb700;
+            font-size: 1.3em;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .loading::after {
+            content: '';
+            animation: dotAnimation 1.5s infinite;
+        }
+
+        @keyframes dotAnimation {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error {
+            color: #ef4444;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #fca5a5;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.05em;
+            text-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+            animation: shake 0.5s cubic-bezier(0.36, 0, 0.66, 1);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .placeholder {
+            color: #bfbfbf;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 500;
+            text-shadow: none;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Star Rating Styles */
+        .rating-section {
+            margin-top: 30px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .rating-label {
+            color: #ffb700;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: block;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .star {
+            font-size: 2.5em;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .star:hover {
+            transform: scale(1.2) rotate(10deg);
+            filter: drop-shadow(0 4px 15px rgba(255, 200, 0, 0.6));
+        }
+
+        .star.active {
+            color: #ffd700;
+            filter: drop-shadow(0 0 15px rgba(255, 200, 0, 0.8));
+        }
+
+        .star.inactive {
+            color: #666;
+            opacity: 0.6;
+        }
+
+        .rating-message {
+            color: #ffb700;
+            font-size: 0.95em;
+            font-weight: 500;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            min-height: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .comic-sentence {
+            color: #ff9300;
+            font-size: 1.1em;
+            font-weight: 600;
+            font-style: italic;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 153, 0, 0.15);
+            border-left: 4px solid #ffb700;
+            border-radius: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease-out;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2.2em;
+                letter-spacing: 1px;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .input-section,
+            .display-section {
+                padding: 25px;
+                border-radius: 16px;
+            }
+
+            .meme-container {
+                aspect-ratio: 4 / 3;
+            }
+
+            .suggestion-btn {
+                padding: 8px 14px;
+                font-size: 0.85em;
+            }
+
+            .generate-btn {
+                padding: 15px 20px;
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .input-section,
+            .display-section {
+                padding: 20px;
+            }
+
+            .suggestion-buttons {
+                gap: 8px;
+            }
+
+            .suggestion-btn {
+                padding: 7px 12px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="landing-page" class="landing-page">
+        <div class="robot-card">
+            <div class="robot-body">
+                <div class="robot-head"></div>
+                <div class="robot-eyes"></div>
+                <div class="robot-mouth"></div>
+                <div class="robot-antenna"></div>
+            </div>
+            <p class="robot-text">📰 Breaking News: Students finally reading announcements… 📣<br>🎉 …because they’re memes now 😂</p>
+            <button class="start-btn" onclick="startExperience()">Start</button>
+        </div>
+    </div>
+
+    <div id="main-content" class="container hidden">
+        <div class="header">
+            <div class="header-top">
+                <h1>✨ Meme Knowledge Generator ✨</h1>
+                <button id="theme-toggle" class="theme-btn">Switch Theme</button>
+            </div>
+            <p>Generate beautiful memes with AI images based on your input!</p>
+        </div>
+
+        <div class="content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>🎭 Create Your Meme</h2>
+
+                <div class="suggestions">
+                    <label>Quick Suggestions:</label>
+                    <div class="suggestion-buttons">
+                        <button class="suggestion-btn" onclick="setSituation('sports day')">🏀 Sports Day</button>
+                        <button class="suggestion-btn" onclick="setSituation('birthday party')">🎂 Birthday</button>
+                        <button class="suggestion-btn" onclick="setSituation('beach vacation')">🏖️ Beach</button>
+                        <button class="suggestion-btn" onclick="setSituation('mountain hiking')">⛰️ Hiking</button>
+                        <button class="suggestion-btn" onclick="setSituation('cooking dinner')">🍳 Cooking</button>
+                        <button class="suggestion-btn" onclick="setSituation('exam date')">📚 Exam Date</button>
+                        <button class="suggestion-btn" onclick="setSituation('announcement')">📢 Announcement</button>
+                        <button class="suggestion-btn" onclick="setSituation('circular')">📄 Circular</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="situation">Enter Your Situation:</label>
+                    <input 
+                        type="text" 
+                        id="situation" 
+                        placeholder="e.g., sports day, birthday party, beach vacation..."
+                        autocomplete="off"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Meme Style (Optional):</label>
+                    <select id="subject">
+                        <option value="">General</option>
+                        <option value="motivational">💪 Motivational</option>
+                        <option value="funny">😂 Funny</option>
+                        <option value="savage">🔥 Savage</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateMeme()">Generate Meme ✨</button>
+            </div>
+
+            <!-- Display Section -->
+            <div class="display-section">
+                <div id="meme-display">
+                    <div class="placeholder">👈 Enter a situation and click "Generate Meme"</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Comic sentences based on situations
+        const comicSentences = {
+            'exam': [
+                '📚 Books don\'t bite...but exams do! 😅',
+                '🎓 Coffee + Books = Success formula! ☕📖',
+                '😰 My brain: "I know this!" Also my brain during exam: "What\'s your name?" 🤦',
+                '📝 Exam mode: 99% panic, 1% preparation! 😭',
+                '🧠 Studying in my dreams, failing in reality! 💭'
+            ],
+            'announcement': [
+                '📢 Plot twist incoming! Stay tuned! 🎬',
+                '🔔 Alert! Something important is coming your way! ⚡',
+                '📣 Breaking news: You\'re about to miss something! 🚨',
+                '🎤 The moment before everything changes! 🌟',
+                '📻 Stop scrolling! This is important! ⛔'
+            ],
+            'circular': [
+                '📄 Rules, rules, and more rules! 📋',
+                '✅ Read carefully, or else! 👀',
+                '🔗 Official says: Pay attention! 📌',
+                '⚖️ Memo received, action expected! 🎯',
+                '📑 Memo mode activated! Important stuff ahead! 🚀'
+            ],
+            'sports': [
+                '⚽ Game day energy: 100%! 🔥',
+                '🏆 Champion vibes only! 🥇',
+                '💪 Let\'s bring the heat! 🎯',
+                '🏃 Running on pure adrenaline! ⚡',
+                '🎉 Victory awaits! Let\'s go! 🚀'
+            ],
+            'birthday': [
+                '🎂 One more year older, still fabulous! ✨',
+                '🎉 Party mode: ACTIVATED! 🎊',
+                '🎈 Age is just a number... a big one! 😂',
+                '🎁 Friends, cake, and unlimited fun! 🥳',
+                '🌟 Birthday magic in the air! ✨'
+            ],
+            'beach': [
+                '🏖️ Sand, sun, and zero responsibilities! ☀️',
+                '🌊 Salt life activated! 💦',
+                '🩱 Summer mode: ON! 🕶️',
+                '🏄 Waves and good vibes only! 🤙',
+                '⛱️ Paradise found! 🌴'
+            ],
+            'cooking': [
+                '👨‍🍳 Master chef in the making! 🍳',
+                '🔥 Kitchen fire: Level Expert! 🌶️',
+                '😋 Taste bud adventure incoming! 🤤',
+                '🍽️ Cooking with love and chaos! 💕',
+                '👩‍🍳 Recipe? I prefer "vibes"! 😎'
+            ],
+            'hiking': [
+                '⛰️ Conquering mountains one step at a time! 🥾',
+                '🏔️ Nature\'s gym is open! 💪',
+                '🌲 Fresh air and epic views ahead! 🌄',
+                '🧗 Climbing towards greatness! 🎯',
+                '🌍 Adventure calls, nature responds! 🗻'
+            ]
+        };
+
+        function getComicSentence(input) {
+            const lowerInput = input.toLowerCase();
+            
+            for (let key in comicSentences) {
+                if (lowerInput.includes(key)) {
+                    const sentences = comicSentences[key];
+                    return sentences[Math.floor(Math.random() * sentences.length)];
+                }
+            }
+            
+            // Default funny sentences
+            const defaults = [
+                '✨ Meme magic at its finest! 🎯',
+                '🎨 Art level: Pro! 🌟',
+                '😂 This is peak content! 🔥',
+                '💯 Perfection in one frame! ✨',
+                '🚀 Take it to the moon! 🌙'
+            ];
+            return defaults[Math.floor(Math.random() * defaults.length)];
+        }
+
+        let currentMemeId = null;
+        let currentRating = 0;
+
+        function setSituation(text) {
+            document.getElementById('situation').value = text;
+            generateMeme();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const themeBtn = document.getElementById('theme-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                themeBtn.textContent = 'Light Mode';
+                themeBtn.style.background = 'rgba(250, 204, 21, 0.95)';
+                themeBtn.style.color = '#1f2937';
+            } else {
+                themeBtn.textContent = 'Dark Mode';
+                themeBtn.style.background = 'rgba(30, 64, 175, 0.95)';
+                themeBtn.style.color = '#ffffff';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeBtn = document.getElementById('theme-toggle');
+            themeBtn.addEventListener('click', toggleTheme);
+            themeBtn.textContent = 'Dark Mode';
+        });
+
+        function setRating(stars) {
+            currentRating = stars;
+            updateStarDisplay(stars);
+            
+            const messages = [
+                '😞 Help us improve!',
+                '😐 It was okay...',
+                '🙂 Not bad!',
+                '😊 Really good!',
+                '🤩 Absolutely amazing!'
+            ];
+            
+            const messageEl = document.querySelector('.rating-message');
+            if (messageEl) {
+                messageEl.textContent = messages[stars - 1];
+            }
+        }
+
+        function updateStarDisplay(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('inactive');
+                    star.classList.add('active');
+                    star.textContent = '⭐';
+                } else {
+                    star.classList.remove('active');
+                    star.classList.add('inactive');
+                    star.textContent = '⭐';
+                }
+            });
+        }
+
+        async function generateMeme() {
+            const situation = document.getElementById('situation').value.trim();
+            const subject = document.getElementById('subject').value || null;
+            const display = document.getElementById('meme-display');
+
+            if (!situation) {
+                display.innerHTML = '<div class="error">⚠️ Please enter a situation!</div>';
+                return;
+            }
+
+            // Show loading state
+            display.innerHTML = '<div class="loading">Generating your meme</div>';
+
+            try {
+                const query = `
+                    mutation {
+                        generateMeme(input: { text: "${situation}"${subject ? `, subject: "${subject}"` : ''} }) {
+                            caption
+                            imageUrl
+                        }
+                    }
+                `;
+
+                console.log('Sending query:', query);
+
+                // Use explicit backend endpoint; avoid 405 when UI is served from another origin.
+                const graphQLEndpoint = 'http://localhost:5000/graphql';
+                const response = await fetch(graphQLEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query }),
+                });
+
+                const rawBody = await response.text();
+                if (!rawBody) {
+                    throw new Error(`Empty response from GraphQL (status ${response.status})`);
+                }
+
+                let result;
+                try {
+                    result = JSON.parse(rawBody);
+                } catch (parseError) {
+                    throw new Error(`Failed to parse GraphQL response as JSON: ${parseError.message}. Body: ${rawBody}`);
+                }
+
+                console.log('GraphQL Response:', result);
+
+                if (!response.ok) {
+                    const errMsg = result.errors?.[0]?.message || `GraphQL API returned status ${response.status}`;
+                    throw new Error(errMsg);
+                }
+
+                if (result.errors) {
+                    display.innerHTML = `<div class="error">❌ Error: ${result.errors[0].message}</div>`;
+                    return;
+                }
+
+                if (result.data && result.data.generateMeme) {
+                    const { caption, imageUrl } = result.data.generateMeme;
+                    
+                    console.log('✅ Caption:', caption);
+                    console.log('✅ Image URL:', imageUrl);
+                    
+                    // Get comic sentence
+                    const comicSentence = getComicSentence(situation);
+                    
+                    // Create meme container with image
+                    const imageElement = document.createElement('img');
+                    imageElement.className = 'meme-image';
+                    imageElement.alt = 'Generated Meme';
+                    imageElement.crossOrigin = 'anonymous';
+                    
+                    // Handle image load
+                    imageElement.onload = function() {
+                        console.log('✅ Image loaded successfully!');
+                    };
+                    
+                    // Handle image error with multi-step fallback
+                    imageElement.onerror = function() {
+                        console.warn('⚠️ Image failed to load from:', this.src);
+
+                        if (!this.dataset.retried) {
+                            this.dataset.retried = '1';
+                            this.src = `https://loremflickr.com/1600/900/${encodeURIComponent(situation)}?random=${Date.now()}`;
+                            return;
+                        }
+
+                        if (!this.dataset.fallbacked) {
+                            this.dataset.fallbacked = '1';
+                            // Use a solid color fallback without text
+                            this.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='900'%3E%3Crect fill='%23232323' width='1600' height='900'/%3E%3C/svg%3E`;
+                            this.style.backgroundColor = '#232323';
+
+                            const notice = document.createElement('div');
+                            notice.className = 'error';
+                            notice.style = 'margin-top: 10px; background: #444; color: #ffeb3b;';
+                            notice.textContent = 'Image source unavailable. Caption text is preserved.';
+                            if (!display.querySelector('.error')) {
+                                display.appendChild(notice);
+                            }
+                            return;
+                        }
+
+                        console.error('❌ All image fallbacks failed, showing plain background');
+                    };
+                    
+                    imageElement.src = imageUrl;
+                    
+                    const memeContainer = document.createElement('div');
+                    memeContainer.className = 'meme-container';
+                    memeContainer.appendChild(imageElement);
+                    
+                    const captionDiv = document.createElement('div');
+                    captionDiv.className = 'meme-caption';
+                    captionDiv.textContent = caption;
+                    
+                    memeContainer.appendChild(captionDiv);
+                    display.innerHTML = '';
+                    display.appendChild(memeContainer);
+                    
+                    // Add comic sentence
+                    const comicDiv = document.createElement('div');
+                    comicDiv.className = 'comic-sentence';
+                    comicDiv.textContent = comicSentence;
+                    display.appendChild(comicDiv);
+                    
+                    // Add rating section
+                    const ratingSection = document.createElement('div');
+                    ratingSection.className = 'rating-section';
+                    ratingSection.innerHTML = `
+                        <label class="rating-label">How did you like this meme?</label>
+                        <div class="stars">
+                            <span class="star inactive" onclick="setRating(1)" style="cursor: pointer;">⭐</span>
+                            <span class="star inactive" onclick="setRating(2)" style="cursor: pointer;">⭐</span>
+                            <span class="star inactive" onclick="setRating(3)" style="cursor: pointer;">⭐</span>
+                            <span class="star inactive" onclick="setRating(4)" style="cursor: pointer;">⭐</span>
+                            <span class="star inactive" onclick="setRating(5)" style="cursor: pointer;">⭐</span>
+                        </div>
+                        <div class="rating-message"></div>
+                    `;
+                    display.appendChild(ratingSection);
+                    
+                } else {
+                    display.innerHTML = '<div class="error">❌ Failed to generate meme</div>';
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                display.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function startExperience() {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+        }
+
+        // Allow Enter key to generate meme
+        document.getElementById('situation').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateMeme();
+            }
+        });
+    </script>
+</body>
+</html>
